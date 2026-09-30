@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>План-факт ЖБИ — система управления производством</title>
+<meta name="description" content="План-факт ЖБИ: план, факт, качество, простои, планёрка и мероприятия завода ЖБИ в одной системе. Как устроено, кто работает, зачем нужно.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<style>
+:root{
+  --ink:#16222B; --ink2:#3E4C57; --muted:#6B7883;
+  --paper:#F3F1EC; --paper2:#E8E5DE; --card:#FBFAF7; --line:#D6D2C8;
+  --dark:#18242D; --dark2:#223340; --onDark:#EEF1F2; --onDark2:#AEBBC4;
+  --acc:#D9661A; --accSoft:#F6E1CF; --blue:#2E6CB0; --blueSoft:#DCE7F3;
+  --ok:#2F7D4F; --bad:#B8322E;
+  --r:14px;
+  --h:'IBM Plex Sans Condensed','IBM Plex Sans',Arial,sans-serif;
+  --b:'IBM Plex Sans',Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--b);font-size:18px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--h);margin:0;line-height:1.1;letter-spacing:-.01em}
+p{margin:0}
+img{max-width:100%;display:block}
+
+.slide{min-height:100vh;padding:72px 6vw 64px;display:flex;flex-direction:column;justify-content:center;gap:36px;position:relative;scroll-snap-align:start}
+.slide.alt{background:var(--paper2)}
+.slide.dark{background:var(--dark);color:var(--onDark)}
+.wrap{max-width:1240px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+.eyebrow{font-family:var(--h);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:14px;color:var(--acc)}
+.dark .eyebrow{color:#F0934F}
+h2{font-size:clamp(32px,4.4vw,56px);font-weight:700}
+h3{font-size:22px;font-weight:700}
+.lead{font-size:clamp(18px,1.6vw,22px);color:var(--ink2);max-width:880px}
+.dark .lead{color:var(--onDark2)}
+.num{position:absolute;right:6vw;bottom:24px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dark .num{color:var(--onDark2)}
+
+/* cover */
+.cover{background:var(--dark);color:var(--onDark);overflow:hidden}
+.cover h1{font-size:clamp(44px,7vw,96px);font-weight:700}
+.cover .sub{font-size:clamp(20px,2vw,28px);color:var(--onDark2);max-width:900px}
+.cover .tags{display:flex;flex-wrap:wrap;gap:10px}
+.tag{border:1px solid #3B5060;border-radius:999px;padding:6px 14px;font-size:15px;color:var(--onDark)}
+.cover .grid-bg{position:absolute;inset:0;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.bar{height:6px;width:120px;background:var(--acc);border-radius:3px}
+.hint{font-size:14px;color:var(--onDark2)}
+
+/* cards */
+.cards{display:grid;gap:18px}
+.c2{grid-template-columns:repeat(2,1fr)}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;display:flex;flex-direction:column;gap:8px}
+.card p{color:var(--ink2);font-size:16.5px}
+.dark .card{background:var(--dark2);border-color:#314657}
+.dark .card p{color:var(--onDark2)}
+.card .k{font-family:var(--h);font-weight:700;font-size:15px;color:var(--acc);text-transform:uppercase;letter-spacing:.08em}
+
+/* problem */
+.pain{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.pain div{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;font-size:17px;color:var(--ink2)}
+.pain b{color:var(--ink)}
+.pain span.x{flex:none;width:28px;height:28px;border-radius:50%;background:#F3D9D6;color:var(--bad);font-weight:700;display:grid;place-items:center;font-size:15px}
+
+/* versus */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.vs .col{border-radius:var(--r);padding:26px 28px;display:flex;flex-direction:column;gap:12px}
+.vs .no{background:var(--card);border:1px dashed #B9B3A6}
+.vs .yes{background:var(--dark);color:var(--onDark)}
+.vs ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.vs .no li{color:var(--ink2)}
+.vs .yes li{color:var(--onDark)}
+.vs h3{font-size:24px}
+
+/* cycle */
+.cycle{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center}
+.cycle svg{width:100%;height:auto}
+.steps{display:flex;flex-direction:column;gap:12px;counter-reset:s}
+.steps div{display:flex;gap:14px;align-items:flex-start}
+.steps div:before{counter-increment:s;content:counter(s);flex:none;width:30px;height:30px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;display:grid;place-items:center;font-size:15px;margin-top:1px}
+.steps p{color:var(--onDark2);font-size:16.5px}
+.steps b{color:var(--onDark)}
+
+/* roles */
+table.roles{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;font-size:16.5px}
+.roles th,.roles td{text-align:left;padding:13px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+.roles th{background:var(--paper2);font-family:var(--h);font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2)}
+.roles td:first-child{font-weight:600;white-space:nowrap}
+.roles tr:last-child td{border-bottom:none}
+.roles td{color:var(--ink2)}
+
+/* day timeline */
+.day{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative}
+.day:before{content:"";position:absolute;left:0;right:0;top:27px;height:3px;background:var(--line)}
+.day .t{position:relative;padding:0 14px 0 0;display:flex;flex-direction:column;gap:10px}
+.day .dot{width:18px;height:18px;border-radius:50%;background:var(--acc);border:4px solid var(--paper2);margin-top:19px;position:relative}
+.day .time{font-family:var(--h);font-weight:700;font-size:26px}
+.day .who{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc);font-weight:700}
+.day p{font-size:16px;color:var(--ink2)}
+
+/* feature + screenshot */
+.feat{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:44px;align-items:center}
+.feat.rev{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr)}
+.feat.rev .txt{order:2}
+.txt{display:flex;flex-direction:column;gap:18px}
+.ticks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.ticks li{position:relative;padding-left:28px;color:var(--ink2);font-size:17px}
+.ticks li:before{content:"";position:absolute;left:2px;top:9px;width:12px;height:7px;border-left:3px solid var(--acc);border-bottom:3px solid var(--acc);transform:rotate(-45deg)}
+.ticks b{color:var(--ink)}
+.dark .ticks li{color:var(--onDark2)}.dark .ticks b{color:var(--onDark)}
+.shot{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 40px -18px #16222B55;overflow:hidden;cursor:zoom-in}
+.shot figcaption{font-size:14px;color:var(--muted);padding:10px 14px;border-top:1px solid var(--line);background:var(--card)}
+figure{margin:0}
+.shots2{display:grid;gap:18px}
+
+/* maturity */
+.mat{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.mat .card h3{font-size:19px}
+
+/* modules */
+.mods{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.mod{border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:10px;background:var(--card);border:1px solid var(--line)}
+.mod.core{background:var(--dark);color:var(--onDark);border-color:var(--dark)}
+.mod.core p{color:var(--onDark2)}
+.mod p{font-size:16px;color:var(--ink2)}
+.mod .st{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.soon{display:flex;gap:10px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:16px}
+.soon span{border:1px dashed #B9B3A6;border-radius:999px;padding:5px 14px}
+
+/* rollout */
+.roll{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.roll .card .k{color:var(--blue)}
+
+/* faq */
+.faq{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 28px}
+.faq div{border-top:2px solid var(--ink);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.faq h3{font-size:19px}
+.faq p{color:var(--ink2);font-size:16.5px}
+
+/* end */
+.end{background:var(--acc);color:#1B1208}
+.end h2{font-size:clamp(34px,5vw,64px)}
+.end .lead{color:#3A230F}
+.end .num{color:#5A3517}
+.end .card{background:#F7E6D6;border-color:#E9B78F}
+.end .card p{color:#3A230F}
+.end .card .k{color:#1B1208}
+.contact{display:grid;grid-template-columns:repeat(4,auto);justify-content:start;gap:14px 44px;border-top:2px solid #1B1208;padding-top:20px}
+.contact div{display:flex;flex-direction:column;gap:2px}
+.contact .cl{font-size:13px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:#5A3517}
+.contact b,.contact a{font-family:var(--h);font-size:24px;font-weight:700;color:#1B1208;text-decoration:none}
+.contact a{border-bottom:2px solid #1B120855}
+.contact a:hover{border-bottom-color:#1B1208}
+@media (max-width:1000px){.contact{grid-template-columns:repeat(2,auto)}}
+@media (max-width:640px){.contact{grid-template-columns:1fr}}
+
+/* nav */
+.nav{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:9px;z-index:10}
+.nav a{width:10px;height:10px;border-radius:50%;background:#9AA5AD;opacity:.55;display:block}
+.nav a.on{background:var(--acc);opacity:1;transform:scale(1.3)}
+.top{position:fixed;left:0;top:0;height:3px;background:var(--acc);z-index:11;width:0}
+.lb{position:fixed;inset:0;background:#0d1419e8;display:none;align-items:center;justify-content:center;z-index:20;padding:3vw;cursor:zoom-out}
+.lb img{max-height:94vh;border-radius:8px}
+.lb.on{display:flex}
+
+@media (max-width:1000px){
+  .c3,.c4,.mods,.roll,.mat{grid-template-columns:repeat(2,1fr)}
+  .cycle,.feat,.feat.rev,.vs{grid-template-columns:1fr}
+  .feat.rev .txt{order:0}
+  .day{grid-template-columns:1fr;gap:18px}
+  .day:before{display:none}
+  .day .t{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+  .day .dot{display:none}
+  .day p{flex-basis:100%}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .slide{min-height:auto;padding:56px 16px 56px}
+  .c2,.c3,.c4,.mods,.roll,.mat,.pain,.faq{grid-template-columns:1fr}
+  .nav{display:none}
+  .roles td:first-child{white-space:normal}
+  .roles th:nth-child(3),.roles td:nth-child(3){display:none}
+  .num{right:16px}
+}
+@media (min-width:641px) and (min-height:700px){ html{scroll-snap-type:y proximity} }
+@media print{
+  .nav,.top,.lb{display:none!important}
+  .slide{min-height:auto;page-break-after:always;break-after:page}
+}
+</style>
+</head>
+<body>
+<div class="top" id="top"></div>
+<nav class="nav" id="nav" aria-label="Слайды"></nav>
+
+<!-- 1 -->
+<section class="slide cover" id="s1">
+  <div class="grid-bg"></div>
+  <div class="wrap" style="position:relative">
+    <div class="bar"></div>
+    <h1>План-факт ЖБИ</h1>
+    <p class="sub">Система оперативного управления заводом железобетонных изделий: от сменного задания мастера до решения планёрки и его исполнения.</p>
+    <div class="tags">
+      <span class="tag">План и факт по сменам</span><span class="tag">Качество (ОТК) и паспорта</span><span class="tag">Простои по QR-коду</span><span class="tag">Время операций</span><span class="tag">Планёрка и мероприятия</span>
+    </div>
+    <p class="hint">Версия 3.1 · Windows и Mac · работает в сети завода без интернета · листать — колесом, стрелками или пробелом</p>
+  </div>
+  <span class="num">01</span>
+</section>
+
+<!-- 2 -->
+<section class="slide" id="s2">
+  <div class="wrap">
+    <div class="eyebrow">Зачем</div>
+    <h2>Как обычно управляют выпуском на заводе ЖБИ</h2>
+    <div class="pain">
+      <div><span class="x">✕</span><p><b>Факт узнают на следующий день.</b> Мастер пишет в журнал или свой Excel, кто-то сводит — отставание видно, когда его уже не догнать.</p></div>
+      <div><span class="x">✕</span><p><b>Причины отставаний теряются.</b> «Не было бетона», «форма в ремонте» — остаётся в разговоре, а не в цифрах.</p></div>
+      <div><span class="x">✕</span><p><b>Планёрка — это разговор.</b> Решения не записаны, ответственные и сроки размыты, через неделю никто не помнит, что обещали.</p></div>
+      <div><span class="x">✕</span><p><b>Брак и простои считают отдельно.</b> ОТК в своей тетради, простои — «на глаз», и связать их с недовыпуском нельзя.</p></div>
+      <div><span class="x">✕</span><p><b>План правят задним числом.</b> Нет утверждения и истории изменений, поэтому план всегда «выполнен».</p></div>
+      <div><span class="x">✕</span><p><b>У каждого своя версия правды.</b> Таблицы расходятся, на совещании спорят о цифрах, а не о решениях.</p></div>
+    </div>
+  </div>
+  <span class="num">02</span>
+</section>
+
+<!-- 3 -->
+<section class="slide alt" id="s3">
+  <div class="wrap">
+    <div class="eyebrow">Что это</div>
+    <h2>Не отчёт из выгрузок, а рабочая система, в которой живёт завод</h2>
+    <div class="vs">
+      <div class="col no">
+        <h3>Чем программа НЕ является</h3>
+        <ul>
+          <li>Не «загрузили Excel — получили красивые графики»</li>
+          <li>Не отчёт, который кто-то собирает раз в неделю</li>
+          <li>Не картинка для руководителя, в которую никто не вносит данные</li>
+          <li>Не облачный сервис, которому нужен интернет и чужой сервер</li>
+        </ul>
+      </div>
+      <div class="col yes">
+        <h3>Чем является</h3>
+        <ul>
+          <li>Каждый участник вносит свою часть данных <b>в момент события</b>: мастер — факт смены, ОТК — брак, оператор — простой с телефона</li>
+          <li>Цифры сразу видны всем: браузеры обновляются каждые 4 секунды</li>
+          <li>Отклонение требует причины, причина ведёт к решению, решение — к мероприятию с ответственным и сроком</li>
+          <li>Права по должностям, журнал действий, утверждённый план, корзина и резервные копии — как у промышленной системы</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <span class="num">03</span>
+</section>
+
+<!-- 4 -->
+<section class="slide dark" id="s4">
+  <div class="wrap">
+    <div class="eyebrow">Логика</div>
+    <h2>Замкнутый цикл управления</h2>
+    <div class="cycle">
+      <svg viewBox="0 0 520 470" role="img" aria-label="Цикл: план, факт, отклонения, планёрка, мероприятия, контроль исполнения">
+        <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#F0934F"/></marker></defs>
+        <circle cx="260" cy="235" r="165" fill="none" stroke="#314657" stroke-width="2" stroke-dasharray="4 7"/>
+        <g fill="none" stroke="#F0934F" stroke-width="3" marker-end="url(#ah)">
+          <path d="M318 88 A165 165 0 0 1 400 150"/>
+          <path d="M423 225 A165 165 0 0 1 400 320"/>
+          <path d="M330 385 A165 165 0 0 1 190 385"/>
+          <path d="M120 320 A165 165 0 0 1 97 225"/>
+          <path d="M120 150 A165 165 0 0 1 202 88"/>
+        </g>
+        <g font-family="IBM Plex Sans Condensed, Arial, sans-serif" font-weight="700" text-anchor="middle">
+          <rect x="195" y="45" width="130" height="50" rx="10" fill="#223340" stroke="#4A6273"/><text x="260" y="76" fill="#EEF1F2" font-size="19">План</text>
+          <rect x="370" y="165" width="130" height="58" rx="10" fill="#223340" stroke="#4A6273"/><text x="435" y="190" fill="#EEF1F2" font-size="19">Факт</text><text x="435" y="211" fill="#AEBBC4" font-size="13" font-weight="400">по сменам</text>
+          <rect x="330" y="340" width="150" height="58" rx="10" fill="#223340" stroke="#4A6273"/><text x="405" y="365" fill="#EEF1F2" font-size="19">Отклонения</text><text x="405" y="386" fill="#AEBBC4" font-size="13" font-weight="400">и их причины</text>
+          <rect x="40" y="340" width="150" height="58" rx="10" fill="#D9661A"/><text x="115" y="365" fill="#fff" font-size="19">Планёрка</text><text x="115" y="386" fill="#FCE7D6" font-size="13" font-weight="400">разбор и решения</text>
+          <rect x="18" y="165" width="150" height="58" rx="10" fill="#223340" stroke="#4A6273"/><text x="93" y="190" fill="#EEF1F2" font-size="19">Мероприятия</text><text x="93" y="211" fill="#AEBBC4" font-size="13" font-weight="400">кто · что · срок</text>
+          <text x="260" y="222" fill="#AEBBC4" font-size="14" font-weight="600">данные для разбора</text>
+          <text x="260" y="248" fill="#EEF1F2" font-size="18">ОТК · Простои</text>
+          <text x="260" y="272" fill="#EEF1F2" font-size="18">Время операций</text>
+        </g>
+      </svg>
+      <div class="steps">
+        <div><p><b>План</b> месяца распределяется по дням с учётом загрузки форм и утверждается. Дальше менять — только с причиной.</p></div>
+        <div><p><b>Факт</b> мастер вносит по сменам, ОТК — брак и доработку. Процент выполнения считается к плану на дату.</p></div>
+        <div><p><b>Отклонения</b> подсвечиваются сразу; без указанной причины они остаются в «дисциплине отчётности».</p></div>
+        <div><p><b>Планёрка</b> идёт по шагам на одном экране: план, отставания, качество, простои, мероприятия.</p></div>
+        <div><p><b>Решения</b> вводятся как «что — кто — срок» и сразу становятся мероприятиями, которые проверяются на следующей планёрке.</p></div>
+      </div>
+    </div>
+  </div>
+  <span class="num">04</span>
+</section>
+
+<!-- 5 -->
+<section class="slide" id="s5">
+  <div class="wrap">
+    <div class="eyebrow">Кто работает</div>
+    <h2>Каждый вносит свою часть и видит своё</h2>
+    <table class="roles">
+      <tr><th>Должность</th><th>Что делает в программе</th><th>Что видит</th></tr>
+      <tr><td>Мастер участка</td><td>Факт годных по сменам, причины отставаний, комментарии; ведёт свои мероприятия; печатает сменное задание</td><td>Свой участок</td></tr>
+      <tr><td>Контролёр ОТК</td><td>Брак и доработку по видам дефектов; выдаёт паспорта качества партий</td><td>Качество по своему участку</td></tr>
+      <tr><td>Технический отдел</td><td>Замеры времени операций, процессы, справочники оборудования и изделий</td><td>По выданным правам</td></tr>
+      <tr><td>Руководитель</td><td>План месяца и его утверждение, планёрка, решения, отчёт за месяц</td><td>Весь завод, дашборд</td></tr>
+      <tr><td>Администратор</td><td>Пользователи, права по разделам, скрытие вкладок, корзина, точки восстановления, лицензия</td><td>Всё</td></tr>
+      <tr><td>Просмотр</td><td>Ничего не меняет</td><td>Разрешённые разделы</td></tr>
+    </table>
+    <p class="lead" style="font-size:17px">Права гибкие: для каждой должности и каждого раздела — «нет / просмотр / изменение», плюс личные права сотрудника. Закрытый раздел не просто спрятан — сервер не отдаёт его данные.</p>
+  </div>
+  <span class="num">05</span>
+</section>
+
+<!-- 6 -->
+<section class="slide alt" id="s6">
+  <div class="wrap">
+    <div class="eyebrow">Как это выглядит в жизни</div>
+    <h2>Один рабочий день</h2>
+    <div class="day">
+      <div class="t"><div class="dot"></div><span class="time">7:30</span><span class="who">Мастер</span><p>Печатает сменное задание на день: что и сколько делать по его участку.</p></div>
+      <div class="t"><div class="dot"></div><span class="time">В смену</span><span class="who">Оператор</span><p>Встала линия — сканирует QR-код на оборудовании телефоном, выбирает причину, запускает таймер простоя.</p></div>
+      <div class="t"><div class="dot"></div><span class="time">Конец смены</span><span class="who">Мастер и ОТК</span><p>Мастер вносит годные и причину, если не догнали план. ОТК вносит брак и доработку.</p></div>
+      <div class="t"><div class="dot"></div><span class="time">Утро, 8:30</span><span class="who">Планёрка</span><p>На проекторе — итоги вчера по участкам, отставания, брак, простои, просроченные мероприятия. Решения — сразу с ответственным и сроком.</p></div>
+      <div class="t"><div class="dot"></div><span class="time">Любой момент</span><span class="who">Руководитель</span><p>Открывает дашборд с телефона: выпуск, бетон, сделка, качество, где теряем больше всего.</p></div>
+    </div>
+  </div>
+  <span class="num">06</span>
+</section>
+
+<!-- 7 -->
+<section class="slide" id="s7">
+  <div class="wrap">
+    <div class="eyebrow">План</div>
+    <h2>План, который нельзя тихо переписать</h2>
+    <div class="cards c3">
+      <div class="card"><span class="k">Цель → дни</span><h3>Распределение по рабочим дням</h3><p>Цель месяца по каждому изделию раскладывается по рабочим дням одной кнопкой. Можно вставить блок прямо из Excel, копировать неделю, перенести план дня.</p></div>
+      <div class="card"><span class="k">Мощности</span><h3>Загрузка форм и линий</h3><p>Справочник форм (количество × оборотов в сутки) и штук за оборот у изделия. Перегруз формы на конкретный день видно красным ещё при планировании.</p></div>
+      <div class="card"><span class="k">Дисциплина</span><h3>Утверждение и журнал</h3><p>После утверждения любое изменение — только с причиной и попадает в журнал. Прошедшие дни заморожены на сервере. В отчёте месяца видно, сколько раз и насколько менялся план.</p></div>
+    </div>
+    <div class="cards c3">
+      <div class="card"><span class="k">Номенклатура</span><h3>Импорт из Excel</h3><p>Изделия загружаются из вашего файла: столбцы распознаются по заголовкам, перед загрузкой — предпросмотр «новое / изменится / ошибка».</p></div>
+      <div class="card"><span class="k">Показатели</span><h3>Штуки, бетон, сделка</h3><p>Объём бетона и расценка фиксируются в плане месяца, поэтому смена номенклатуры не переписывает прошлые месяцы.</p></div>
+      <div class="card"><span class="k">Периоды</span><h3>День, неделя, месяц, год</h3><p>Данные хранятся по дням, поэтому неделя на стыке месяцев, «накопительно» и «с начала года» считаются сами.</p></div>
+    </div>
+  </div>
+  <span class="num">07</span>
+</section>
+
+<!-- 8 -->
+<section class="slide alt" id="s8">
+  <div class="wrap">
+    <div class="eyebrow">Факт и контроль</div>
+    <h2>Дашборд руководителя</h2>
+    <div class="feat">
+      <div class="txt">
+        <ul class="ticks">
+          <li><b>Выпуск, бетон, сделка</b> — к плану на дату, а не к плану месяца: прошлые дни целиком, сегодня — по уже внесённым изделиям</li>
+          <li><b>Дисциплина отчётности</b> — сколько отставаний без причины и где мастер не внёс факт</li>
+          <li><b>Качество</b> — % брака и доработки от изготовленного, потери бетона</li>
+          <li><b>«Где теряем»</b> — Парето недовыпуска, брака и доработки по цехам, изделиям, дефектам и сменам с провалом до конкретного дня</li>
+          <li><b>По сменам</b> — сравнение смен по выпуску, браку и изделиям с наибольшей разницей</li>
+        </ul>
+      </div>
+      <figure class="shot"><img src="img/dashboard.webp" alt="Дашборд руководителя: выпуск, бетон, сделка, дисциплина, качество" loading="lazy"><figcaption>Дашборд руководителя (примерные данные)</figcaption></figure>
+    </div>
+  </div>
+  <span class="num">08</span>
+</section>
+
+<!-- 9 -->
+<section class="slide" id="s9">
+  <div class="wrap">
+    <div class="eyebrow">Планёрка</div>
+    <h2>Планёрка по шагам — с протоколом и исполнением</h2>
+    <div class="feat rev">
+      <div class="shots2">
+        <figure class="shot"><img src="img/planerka-plan.webp" alt="Планёрка: выполнение плана по участкам" loading="lazy"><figcaption>Шаг «Выполнение плана»: итоги дня по участкам</figcaption></figure>
+        <figure class="shot"><img src="img/planerka-meropriyatiya.webp" alt="Планёрка: мероприятия" loading="lazy"><figcaption>Шаг «Мероприятия»: выполнено и перенос срока одним нажатием</figcaption></figure>
+      </div>
+      <div class="txt">
+        <ul class="ticks">
+          <li><b>Шесть шагов:</b> план → отставания и причины → качество → простои → мероприятия → решения</li>
+          <li><b>Период</b> — вчера, сегодня, неделя, месяц, накопительно; фильтр по участку</li>
+          <li><b>Решение</b> вводится строкой «что — кто — срок» и сразу становится мероприятием</li>
+          <li><b>Перенос срока</b> — только с причиной; прошлые протоколы сервер переписать не даёт</li>
+          <li><b>Режим «На весь экран»</b> для проектора, печать протокола</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <span class="num">09</span>
+</section>
+
+<!-- 10 -->
+<section class="slide alt" id="s10">
+  <div class="wrap">
+    <div class="eyebrow">Модуль «Качество (ОТК)»</div>
+    <h2>Брак, доработка и паспорта качества</h2>
+    <div class="feat">
+      <div class="txt">
+        <ul class="ticks">
+          <li><b>Брак и доработка</b> по сменам и видам дефектов вносит ОТК, а не мастер — цифры независимы</li>
+          <li><b>Парето</b> по видам дефектов, изделиям и сменам; матрица по дням</li>
+          <li><b>Паспорта качества партии по ГОСТ 13015</b>: сквозной номер, печать A4 с реквизитами завода. Подсказка, сколько годных изготовлено и сколько уже вошло в паспорта</li>
+          <li><b>Выданный паспорт не меняется</b> — только аннулирование с причиной</li>
+        </ul>
+      </div>
+      <figure class="shot"><img src="img/smeny.webp" alt="Сравнение смен: выпуск, брак и доработка" loading="lazy"><figcaption>Сравнение смен: выпуск, брак и доработка по участкам и дням</figcaption></figure>
+    </div>
+  </div>
+  <span class="num">10</span>
+</section>
+
+<!-- 11 -->
+<section class="slide" id="s11">
+  <div class="wrap">
+    <div class="eyebrow">Модуль «Простои оборудования»</div>
+    <h2>Простой фиксирует тот, кто его видит</h2>
+    <div class="feat rev">
+      <figure class="shot"><img src="img/prostoi.webp" alt="Простои оборудования: процент от планового времени и Парето причин" loading="lazy"><figcaption>Анализ простоев: % от планового времени, Парето причин</figcaption></figure>
+      <div class="txt">
+        <ul class="ticks">
+          <li><b>QR-код на оборудовании</b> → страница на телефоне: причина, «Начать простой», таймер, «Завершён»</li>
+          <li><b>Коды печатаются</b> из программы на листе A4, без интернета</li>
+          <li><b>«Что стоит сейчас»</b> и журнал; забытые простои закрываются автоматически, без выдуманного времени</li>
+          <li><b>Анализ:</b> % простоя от планового времени и цель, Парето причин, тепловая карта «оборудование × причина»</li>
+          <li><b>На планёрке</b> — отдельный шаг «Простои»</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <span class="num">11</span>
+</section>
+
+<!-- 12 -->
+<section class="slide alt" id="s12">
+  <div class="wrap">
+    <div class="eyebrow">Модуль «Время операций»</div>
+    <h2>Где теряется время внутри процесса</h2>
+    <div class="feat">
+      <div class="txt">
+        <ul class="ticks">
+          <li><b>Хронометраж:</b> шаги × циклы, ввод «1:25», вставка из Excel или заполненный Excel-шаблон</li>
+          <li><b>Ямадзуми:</b> операции против такта, узкое место, баланс линии, виды потерь (муда)</li>
+          <li><b>Мероприятия по потерям:</b> «было» из замера, «стало» из следующего — экономия подтверждена замером, а не обещанием</li>
+          <li><b>История замеров</b> процесса с графиком</li>
+        </ul>
+      </div>
+      <figure class="shot"><img src="img/vremya-operaciy.webp" alt="Время операций: Ямадзуми, такт, узкое место, потери" loading="lazy"><figcaption>Ямадзуми: такт, узкое место, потери</figcaption></figure>
+    </div>
+  </div>
+  <span class="num">12</span>
+</section>
+
+<!-- 13 -->
+<section class="slide dark" id="s13">
+  <div class="wrap">
+    <div class="eyebrow">Зрелость</div>
+    <h2>То, что отличает систему от таблицы</h2>
+    <div class="mat">
+      <div class="card"><h3>Права и ответственность</h3><p>Шесть должностей, права по каждому разделу, участок ограничивает мастера и ОТК. Каждая ячейка помнит, кто и когда её изменил.</p></div>
+      <div class="card"><h3>Журнал действий</h3><p>Входы, изменения плана, справочников, мероприятий и пользователей записываются. Прошлое не переписывается молча.</p></div>
+      <div class="card"><h3>Корзина на 30 дней</h3><p>Удалённые мероприятия, записи простоев, замеры и пользователи восстанавливаются администратором.</p></div>
+      <div class="card"><h3>Резервные копии</h3><p>Ежедневная копия базы, точки восстановления по кнопке, возврат с сохранением текущего состояния.</p></div>
+      <div class="card"><h3>Данные у вас</h3><p>Сервер — компьютер в сети завода. Интернет не нужен, данные никуда не уходят. Мастера заходят с ПК или телефона через браузер.</p></div>
+      <div class="card"><h3>Обновления и качество</h3><p>Программа сама сообщает о новой версии и показывает, что изменилось. Перед каждым выпуском — 238 автоматических проверок.</p></div>
+    </div>
+  </div>
+  <span class="num">13</span>
+</section>
+
+<!-- 14 -->
+<section class="slide" id="s14">
+  <div class="wrap">
+    <div class="eyebrow">Состав</div>
+    <h2>Одна программа — модули по лицензии</h2>
+    <div class="mods">
+      <div class="mod core"><span class="st" style="color:#F0934F">Основа</span><h3>План-факт</h3><p>План месяца, факт по сменам, причины, сводка, дашборд, планёрка, мероприятия, отчёт за месяц.</p></div>
+      <div class="mod"><span class="st" style="color:var(--ok)">Модуль</span><h3>Качество (ОТК)</h3><p>Брак и доработка, виды дефектов, Парето, паспорта качества по ГОСТ 13015.</p></div>
+      <div class="mod"><span class="st" style="color:var(--ok)">Модуль</span><h3>Простои</h3><p>QR-коды на оборудовании, журнал, анализ, цели по простоям.</p></div>
+      <div class="mod"><span class="st" style="color:var(--ok)">Модуль</span><h3>Время операций</h3><p>Хронометраж, Ямадзуми, потери, мероприятия с подтверждённым эффектом.</p></div>
+    </div>
+    <div class="soon">В планах:<span>Склад и отгрузка</span><span>Выгрузка в 1С</span><span>Связь простоев с план-фактом</span></div>
+    <p class="lead" style="font-size:17px">Модуль включается файлом лицензии без переустановки. Ненужные вкладки администратор скрывает, данные при этом сохраняются.</p>
+  </div>
+  <span class="num">14</span>
+</section>
+
+<!-- 15 -->
+<section class="slide alt" id="s15">
+  <div class="wrap">
+    <div class="eyebrow">Внедрение</div>
+    <h2>Как начать</h2>
+    <div class="roll">
+      <div class="card"><span class="k">Шаг 1</span><h3>Установка</h3><p>Установщик для Windows или архив для Mac на компьютер, который постоянно включён в сети завода. Сервер запускается сам.</p></div>
+      <div class="card"><span class="k">Шаг 2</span><h3>Справочники</h3><p>Номенклатура из Excel, участки, формы, причины, оборудование. Пользователи с логинами и временными паролями.</p></div>
+      <div class="card"><span class="k">Шаг 3</span><h3>Первый месяц</h3><p>План месяца, ежедневный факт мастерами, ОТК, QR-коды на оборудование. Планёрка по программе.</p></div>
+      <div class="card"><span class="k">Шаг 4</span><h3>Итоги пилота</h3><p>Отчёт за месяц: выполнение, причины, брак, простои, исполнение решений. Решение о дальнейшей работе.</p></div>
+    </div>
+    <div class="cards c2">
+      <div class="card"><span class="k">Пробный период</span><h3>7 дней, все модули</h3><p>Программа ставится с примерными данными завода ЖБИ, чтобы сразу было видно, как всё работает.</p></div>
+      <div class="card"><span class="k">Пилот</span><h3>30 дней на вашем заводе</h3><p>С сопровождением: настройка под ваши участки и изделия, обучение мастеров и ОТК.</p></div>
+    </div>
+  </div>
+  <span class="num">15</span>
+</section>
+
+<!-- 16 -->
+<section class="slide" id="s16">
+  <div class="wrap">
+    <div class="eyebrow">Частые вопросы</div>
+    <h2>Что обычно спрашивают</h2>
+    <div class="faq">
+      <div><h3>Нужен ли интернет?</h3><p>Нет. Программа работает в локальной сети завода. Интернет нужен только чтобы узнать о новой версии — и это можно выключить.</p></div>
+      <div><h3>Где хранятся данные?</h3><p>В одном файле базы на вашем компьютере-сервере. Ежедневные копии хранятся 30 дней.</p></div>
+      <div><h3>Что нужно мастерам?</h3><p>Только браузер на рабочем компьютере или телефоне в сети завода. Ничего устанавливать не нужно.</p></div>
+      <div><h3>Какой нужен компьютер?</h3><p>Обычный компьютер на Windows или Mac, который постоянно включён. Отдельный сервер не обязателен.</p></div>
+      <div><h3>Можно перенести наши данные из Excel?</h3><p>Номенклатура загружается из Excel с предпросмотром; план вставляется из Excel блоком; журнал простоев — из Google-таблицы.</p></div>
+      <div><h3>А если мы работаем в 1С?</h3><p>План-факт ведёт оперативный учёт смены, 1С — бухгалтерский. Выгрузка в 1С — в планах развития.</p></div>
+    </div>
+  </div>
+  <span class="num">16</span>
+</section>
+
+<!-- 17 -->
+<section class="slide end" id="s17">
+  <div class="wrap">
+    <h2>Цифры смены — к утру,<br>решения планёрки — под контролем</h2>
+    <p class="lead">План-факт ЖБИ делает оперативное управление заводом прозрачным: каждый вносит свою часть, отклонения видны сразу, решения исполняются.</p>
+    <div class="cards c3">
+      <div class="card"><span class="k">Посмотреть</span><p>Демонстрация на примерных данных — 30 минут онлайн или на заводе.</p></div>
+      <div class="card"><span class="k">Попробовать</span><p>Пробный период 7 дней или пилот на 30 дней на вашем заводе.</p></div>
+      <div class="card"><span class="k">Связаться</span><p>Напишите или позвоните — покажем программу на ваших изделиях.</p></div>
+    </div>
+    <div class="contact">
+      <div><span class="cl">Контакт</span><b>Егор Краус</b></div>
+      <div><span class="cl">Телефон</span><a href="tel:+79607988926">+7 960 798-89-26</a></div>
+      <div><span class="cl">Telegram</span><a href="https://t.me/Egor_Kraus" target="_blank" rel="noopener">@Egor_Kraus</a></div>
+      <div><span class="cl">Канал</span><a href="https://t.me/kraus_factory" target="_blank" rel="noopener">t.me/kraus_factory</a></div>
+    </div>
+  </div>
+  <span class="num">17</span>
+</section>
+
+<div class="lb" id="lb"><img alt=""></div>
+
+<script>
+(function(){
+  var S=[].slice.call(document.querySelectorAll('.slide')), nav=document.getElementById('nav'), bar=document.getElementById('top');
+  S.forEach(function(s,i){var a=document.createElement('a');a.href='#'+s.id;a.title='Слайд '+(i+1);nav.appendChild(a);});
+  var dots=[].slice.call(nav.children), cur=0;
+  function upd(){
+    var y=window.scrollY+window.innerHeight*0.4, k=0;
+    S.forEach(function(s,i){if(s.offsetTop<=y)k=i;});
+    cur=k; dots.forEach(function(d,i){d.classList.toggle('on',i===k);});
+    var h=document.documentElement.scrollHeight-window.innerHeight; bar.style.width=(h>0?window.scrollY/h*100:0)+'%';
+  }
+  window.addEventListener('scroll',upd,{passive:true}); window.addEventListener('resize',upd); upd();
+  function go(i){i=Math.max(0,Math.min(S.length-1,i));S[i].scrollIntoView({behavior:'smooth'});}
+  document.addEventListener('keydown',function(e){
+    if(lb.classList.contains('on')){if(e.key==='Escape')lb.classList.remove('on');return;}
+    if(e.target.tagName==='INPUT')return;
+    if(['ArrowDown','PageDown','ArrowRight',' '].indexOf(e.key)>=0){e.preventDefault();go(cur+1);}
+    else if(['ArrowUp','PageUp','ArrowLeft'].indexOf(e.key)>=0){e.preventDefault();go(cur-1);}
+    else if(e.key==='Home'){e.preventDefault();go(0);} else if(e.key==='End'){e.preventDefault();go(S.length-1);}
+    else if(e.key==='f'||e.key==='а'){if(document.fullscreenElement)document.exitFullscreen();else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen();}
+  });
+  var lb=document.getElementById('lb'), li=lb.querySelector('img');
+  document.querySelectorAll('.shot img').forEach(function(im){im.addEventListener('click',function(){li.src=im.src;li.alt=im.alt;lb.classList.add('on');});});
+  lb.addEventListener('click',function(){lb.classList.remove('on');});
+})();
+</script>
+</body>
+</html>

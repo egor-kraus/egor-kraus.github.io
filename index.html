@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Егор Краус — управление производством ЖБИ</title>
+<meta name="description" content="Программа «План-факт ЖБИ», система документов завода и запуск производства под ключ.">
+<meta property="og:title" content="Егор Краус — управление производством ЖБИ">
+<meta property="og:description" content="Программа «План-факт ЖБИ», система документов завода и запуск производства под ключ.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--paper:#f3f4f2;--sheet:#fff;--ink:#1b2125;--ink-2:#4d575d;--rule:#d5d9d8;--steel:#1f5fa8;--steel-soft:#e4ecf6;
+  --f-disp:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;--f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--paper:#15191b;--sheet:#1d2326;--ink:#e6eaeb;--ink-2:#a3adb2;--rule:#333c40;--steel:#7fb0ea;--steel-soft:#1f2e40;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--f-body)}
+.wrap{max-width:960px;margin:0 auto;padding-inline:20px;padding-block:48px 64px;display:grid;gap:36px}
+h1,h2{font-family:var(--f-disp);margin:0;text-wrap:balance}
+h1{font-size:clamp(40px,7vw,64px);line-height:1;font-weight:700}
+h2{font-size:24px;font-weight:700;line-height:1.15}
+p{margin:0;max-width:62ch}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.lead{font-size:19px;color:var(--ink-2)}
+header{display:grid;gap:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
+.card{background:var(--sheet);border:1px solid var(--rule);padding:22px;display:grid;gap:10px;align-content:start;text-decoration:none;color:inherit}
+.card:hover{border-color:var(--steel)}
+.card:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+.card .go{color:var(--steel);font-weight:600}
+.card p{color:var(--ink-2);font-size:15.5px}
+.contact{border-top:1px solid var(--rule);padding-top:28px;display:grid;gap:12px}
+.line{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.copy{font:inherit;font-family:var(--f-mono);font-size:15px;background:var(--steel-soft);color:var(--ink);border:1px solid var(--rule);padding:6px 10px;cursor:pointer;border-radius:3px}
+.copy[data-done]::after{content:" — скопировано";color:var(--steel);font-family:var(--f-body);font-size:13px}
+a{color:var(--steel)}
+footer{font-size:13.5px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Управление производством сборного железобетона</span>
+    <h1>Егор Краус</h1>
+    <p class="lead">Помогаю заводам ЖБИ видеть отставание от плана на следующее утро, а не в конце месяца, и разбираться с его причинами: программа для ежедневного контроля, система документов завода и запуск производства под ключ.</p>
+  </header>
+
+  <div class="cards">
+    <a class="card" href="plan-fakt/">
+      <span class="eyebrow">Программа</span>
+      <h2>«План-факт ЖБИ»</h2>
+      <p>План по дням и факт по сменам с причинами недовыпуска, ежедневная планёрка с протоколом, брак по сменам, простои по QR-коду с телефона.</p>
+      <span class="go">Презентация →</span>
+    </a>
+    <a class="card" href="dokumenty/">
+      <span class="eyebrow">Документы</span>
+      <h2>Система документов завода</h2>
+      <p>116 связанных документов: технологические карты, инструкции ОТК, регламенты управления, аудит действующего завода и план ввода на 12 месяцев.</p>
+      <span class="go">Состав и примеры →</span>
+    </a>
+  </div>
+
+  <div class="contact">
+    <h2>Связаться</h2>
+    <div class="line">
+      <button class="copy" type="button" data-copy="+7 960 798-89-26">+7 960 798-89-26</button>
+      <a href="https://t.me/Egor_Kraus" target="_blank" rel="noopener">Telegram @Egor_Kraus</a>
+      <a href="https://t.me/kraus_factory" target="_blank" rel="noopener">Канал t.me/kraus_factory</a>
+    </div>
+    <p style="color:var(--ink-2)">Для первых заводов — бесплатный пилот программы на 30 дней с цифрами «было / стало» в конце.</p>
+  </div>
+
+</div>
+<script>
+document.querySelectorAll('.copy').forEach(function(b){b.addEventListener('click',function(){
+  var v=b.getAttribute('data-copy');function done(){b.setAttribute('data-done','');setTimeout(function(){b.removeAttribute('data-done')},1800)}
+  try{navigator.clipboard.writeText(v).then(done,function(){})}catch(e){}});});
+</script>
+</body>
+</html>
